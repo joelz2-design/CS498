@@ -11,13 +11,13 @@ def reduce_scatter(chunks, tmp, world, rank, left, right):
     # your code here: follow slides instruction: do counter-clockwise iteration
 
     for i in range(world-1):
-        s = dist.isend(chunks[rank-i], right) # rank 0 sends chunk[0], chunk[-1], chunk[-2], therefore, chunks[rank-i]
-        r = dist.irecv(tmp, left) # rank 0 receives rank[-1]
+        s = dist.isend(chunks[(i + rank)%world], left) # rank 0 sends chunk[0], chunk[1], chunk[2], therefore, chunks[i]
+        r = dist.irecv(tmp, right) # rank 0 receives rank[-1]
         s.wait()
         r.wait()
 
-        # rank 0 updates chunk[-1] from rank[-1], rank 1 updates chunk[0] from rank[0], chunk[rank - i] update by temmp
-        chunks[-1] += temp
+        # rank 0 updates chunk[1] from rank 1, rank 1 updates chunk[2] from rank 3, chunk[] update by temp[i + 1 + rank) % world]
+        chunks[(i + 1 + rank) % world] += tmp
     #                                                                   #
     #                                                                   #
     return chunks
@@ -27,16 +27,16 @@ def all_gather(chunks, tmp, current, world, rank, left, right):
     #                                                                   #
     # your code here: follow slides instruction: do counter-clockwise iteration
 
-    # rank 0 gives chunk[1] to rank[1], then receive chunk[0] from rank 4;
-    #        gives chunk[0] to rank[1], then receive chunk[-1] from rank 4
+    # rank 0 gives chunk[-1] to rank[-1], then receive chunk[0] from rank 1;
+    #        gives chunk[0] to rank[-1], then receive chunk[1] from rank 1;
 
     for i in range(world-1):
-        s = dist.isend(chunks[(rank - i + 1) % world], right)
-        r = dist.irecv(tmp, left)
+        s = dist.isend(chunks[(current - 1 + i) % world], left)
+        r = dist.irecv(tmp, right)
         s.wait()
         r.wait()
 
-        chunks[(rank - i + 1) % world] = tmp
+        chunks[(current + i) % world] = tmp
     #                                                                   #
     #                                                                   #
     return chunks
