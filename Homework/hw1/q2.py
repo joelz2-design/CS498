@@ -14,6 +14,11 @@ def server(params, opt, world):
     #                                                                   #
     #                                                                   #
     # your code here: receive gradients form worker, and add them to agg#
+    for src in [1, 2]:
+        grad_buf = torch.empty_like(flat_grad)
+        r = dist.irecv(grad_buf, src=src)
+        r.wait()
+        agg += grad_buf
     #                                                                   #
     #                                                                   #
 
@@ -28,27 +33,33 @@ def server(params, opt, world):
     #                                                                   #
     #                                                                   #
     # your code here: send packed 1-D parameter tensor to all workers   #
+    for dst in [1, 2]:
+        s = dist.isend(flat_param, dst=src)
+        s.wait()
     #                                                                   #
     #                                                                   #
 
 def worker(params):
     flat_grad = _flatten_dense_tensors([p.grad for p in params]).contiguous()
     # ---- push grads to server ----
-
     #                                                                   #
     #                                                                   #
     # your code here: send packed 1-D gradient to server
+    s = dist.isend(flat_grad, dist=0)
+    s.wait()
     #                                                                   #
     #                                                                   #
 
     # ---- receive updated params, write into local model ----
-    
+    flat_update_param_buf = torch.empty_like(flat_grad)
+    r = dist.irecv(flat_update_param_buf, src=0)
+    r.wait()
     #                                                                   #
     #                                                                   #
     # your code here: please get correct 1-D packed parameter from server
     #           And then unpacked it and store in synced_params
     #                                                                   #
-    synced_params = None #you should  assign correct value for synced_params#
+    synced_params = _unflatten_dense_tensors(flat_update_param_buf, [p.data for p in params]) #you should  assign correct value for synced_params#
 
 
     # ---- syncronize the parameters ----
