@@ -36,10 +36,10 @@ def shard_weights(w1, w2, rank, world_size):
     end = start + local_F
 
     w1_shard = w1[:, start: end].clone().contiguous()
-    w2_shard = w2[start: end, :].clone().contiguous(）
+    w2_shard = w2[start: end, :].clone().contiguous()
         
 
-    return w1_shard, w1_shard
+    return w1_shard, w2_shard
         
     #                                                                   #
 
@@ -64,13 +64,13 @@ def sum_across_ranks(tensor, rank, world_size):
     #                send the completed sum to every worker              #
     if rank == 0:
         sum_buf = tensor.clone()
-        for i in range(1, world_size-1):
+        for i in range(1, world_size):
             tensor_buf = torch.zeros_like(tensor)
             r = dist.irecv(tensor_buf, src=i)
             r.wait()
             sum_buf += tensor_buf
 
-        for i in range(1, world_size-1):
+        for i in range(1, world_size):
             s = dist.isend(sum_buf, dst=i)
             s.wait()
 
@@ -111,7 +111,7 @@ def mlp_forward(x, w1_local, w2_local, rank, world_size):
     z = (x @ w1_local) # partial_sum: [T, F_r]
     a = F.gelu(z)
     partial_output = a @ w2_local # partial_sum: [T, H]
-    output = sum_across_ranks(z, rank, world_size)
+    output = sum_across_ranks(partial_output, rank, world_size)
     cache = (x, z, a, w1_local, w2_local)
     
     # ---- combine outputs and save values for backward ----
