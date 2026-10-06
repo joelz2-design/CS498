@@ -14,7 +14,7 @@ def server(params, opt, world):
     #                                                                   #
     #                                                                   #
     # your code here: receive gradients form worker, and add them to agg#
-    for src in [1, 2]:
+    for src in range(1, world-1):
         grad_buf = torch.empty_like(flat_grad)
         r = dist.irecv(grad_buf, src=src)
         r.wait()
@@ -33,8 +33,8 @@ def server(params, opt, world):
     #                                                                   #
     #                                                                   #
     # your code here: send packed 1-D parameter tensor to all workers   #
-    for dst in [1, 2]:
-        s = dist.isend(flat_param, dst=src)
+    for dst in range(1, world-1):
+        s = dist.isend(flat_param, dst=dst)
         s.wait()
     #                                                                   #
     #                                                                   #
@@ -45,7 +45,7 @@ def worker(params):
     #                                                                   #
     #                                                                   #
     # your code here: send packed 1-D gradient to server
-    s = dist.isend(flat_grad, dist=0)
+    s = dist.isend(flat_grad, dst=0)
     s.wait()
     #                                                                   #
     #                                                                   #
