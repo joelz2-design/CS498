@@ -24,8 +24,24 @@ def shard_weights(w1, w2, rank, world_size):
     #                                                                   #
     # your code here: find this rank's feature range, including remainder #
     #                columns, and copy the matching w1/w2 shards          #
+
+    H, F = w1.shape
+    
+    base = F // world_size
+    extra = F % world_size
+
+    local_F = base + (1 if rank < extra else 0)
+
+    start = rank * base + min(rank, extra)
+    end = start + local_F
+
+    w1_shard = w1[:, start: end].clone().contiguous()
+    w2_shard = w2[start: end, :].clone().contiguous(）
+        
+
+    return w1_shard, w1_shard
+        
     #                                                                   #
-    raise NotImplementedError("Implement shard_weights")
 
 
 @torch.no_grad()
@@ -38,20 +54,45 @@ def sum_across_ranks(tensor, rank, world_size):
     # Only this function may communicate: use isend/irecv and wait().
     #                                                                   #
     # your code here: handle the single-rank case                        #
+    if world_size == 1:
+        return tensor.clone().contiguous()
     #                                                                   #
 
     # ---- rank 0: aggregate contributions, then send the sum ----
     #                                                                   #
     # your code here: include rank 0's input and receive from workers;    #
     #                send the completed sum to every worker              #
-    #                                                                   #
+    if rank == 0:
+        sum_buf = tensor.clone()
+        for i in range(1, world_size-1):
+            tensor_buf = torch.zeros_like(tensor)
+            r = dist.irecv(tensor_buf, src=i)
+            r.wait()
+            sum_buf += tensor_buf
 
+        for i in range(1, world_size-1):
+            s = dist.isend(sum_buf, dst=i)
+            s.wait()
+
+        return sum_buf
+
+
+    if rank != 0:
+        s = dist.isend(tensor, dst=0)
+        s.wait()
+
+        sum_buf = torch.zeros_like(tensor)
+        r = dist.irecv(sum_buf, src=0)
+        r.wait()
+
+        return sum_buf
+    
+    #                                                                   #
     # ---- other ranks: send the local contribution, receive the sum ----
     #                                                                   #
     # your code here: send to rank 0 and receive the completed sum        #
     #                Wait before reading/reusing buffers or returning.   #
     #                                                                   #
-    raise NotImplementedError("Implement sum_across_ranks")
 
 
 @torch.no_grad()
@@ -67,11 +108,18 @@ def mlp_forward(x, w1_local, w2_local, rank, world_size):
     # your code here: compute z, a, and the local partial output          #
     #                                                                   #
 
+    z = (x @ w1_local) # partial_sum: [T, F_r]
+    a = F.gelu(z)
+    partial_output = a @ w2_local # partial_sum: [T, H]
+    output = sum_across_ranks(z, rank, world_size)
+    cache = (x, z, a, w1_local, w2_local)
+    
     # ---- combine outputs and save values for backward ----
     #                                                                   #
     # your code here: call sum_across_ranks and return output with cache  #
     #                                                                   #
-    raise NotImplementedError("Implement mlp_forward")
+    return output, cache
+
 
 
 @torch.no_grad()
@@ -87,10 +135,20 @@ def mlp_backward(grad_output, cache, rank, world_size):
     # your code here: compute grad_w2, grad_z, and grad_w1 manually        #
     #                Use the supplied gelu_derivative helper.            #
     #                                                                   #
+    
+    x, z, a, w1_local, w2_local = cache
+    grad_w2 = a.T @ grad_output
+    grad_a = grad_output @ w2_local.T
+    grad_z = grad_a * gelu_derivative(z)
+    grad_w1 = x.T @ grad_z
 
     # ---- combine input-gradient contributions ----
     #                                                                   #
     # your code here: compute local grad_x, sum it across ranks, and      #
     #                return grad_x with the two local weight gradients   #
     #                                                                   #
-    raise NotImplementedError("Implement mlp_backward")
+
+    local_grad_x = grad_z @ w1_local.T  # grad_z : [T, F_r] w1_local: [H, F_r]
+    grad_x = sum_across_ranks(local_grad_x, rank, world_size)
+    return (grad_x, grad_w1, grad_w2)
+    
