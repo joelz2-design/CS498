@@ -14,13 +14,14 @@ def server(params, opt, world):
     #                                                                   #
     #                                                                   #
     # your code here: receive gradients form worker, and add them to agg#
-    for src in range(1, world):
+    for src in range(world):
         grad_buf = torch.empty_like(flat_grad)
         r = dist.irecv(grad_buf, src=src)
         r.wait()
         agg += grad_buf
     #                                                                   #
     #                                                                   #
+    agg /= world # average
 
     synced_grads = _unflatten_dense_tensors(agg, [p.grad for p in params])
     # ---- set averaged grads locally & step ----
@@ -33,7 +34,7 @@ def server(params, opt, world):
     #                                                                   #
     #                                                                   #
     # your code here: send packed 1-D parameter tensor to all workers   #
-    for dst in range(1, world):
+    for dst in range(world):
         s = dist.isend(flat_param, dst=dst)
         s.wait()
     #                                                                   #
