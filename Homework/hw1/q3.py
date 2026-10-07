@@ -36,7 +36,7 @@ def all_gather(chunks, tmp, current, world, rank, left, right):
         s.wait()
         r.wait()
 
-        chunks[(current + i) % world] = tmp
+        chunks[(current + i) % world]._copy(tmp)
     #                                                                   #
     #                                                                   #
     return chunks
@@ -70,6 +70,7 @@ def ring_allreduce_(tensor: torch.Tensor, world_size = None, rankid = None):
     tmp = torch.empty_like(chunks[0])
     chunks = reduce_scatter(chunks, tmp, world, rank, left, right)
     chunks = all_gather(chunks, tmp, rank, world, rank, left, right)
+    flat = padded_flat
     #
     #                                                                   #
     #                                                                   #
