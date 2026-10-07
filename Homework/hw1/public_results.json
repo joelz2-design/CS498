@@ -1,0 +1,160 @@
+{
+  "submission": "/users/xinghao/CS498/Homework/hw1",
+  "totals": {
+    "2": {
+      "public": {
+        "earned": 3.0,
+        "possible": 3.0
+      }
+    },
+    "3": {
+      "public": {
+        "earned": 9.0,
+        "possible": 9.0
+      }
+    },
+    "4": {
+      "public": {
+        "earned": 7.5,
+        "possible": 7.5
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "q2_public_01",
+      "question": 2,
+      "visibility": "public",
+      "earned": 1.0,
+      "possible": 1.0,
+      "components": {
+        "server": 0.5,
+        "worker": 0.5
+      },
+      "timed_out": false,
+      "exit_code": 0,
+      "log": "/users/xinghao/CS498/Homework/hw1/public_results.logs/q2_public_01.log"
+    },
+    {
+      "id": "q2_public_02",
+      "question": 2,
+      "visibility": "public",
+      "earned": 1.0,
+      "possible": 1.0,
+      "components": {
+        "server": 0.5,
+        "worker": 0.5
+      },
+      "timed_out": false,
+      "exit_code": 0,
+      "log": "/users/xinghao/CS498/Homework/hw1/public_results.logs/q2_public_02.log"
+    },
+    {
+      "id": "q2_public_03",
+      "question": 2,
+      "visibility": "public",
+      "earned": 1.0,
+      "possible": 1.0,
+      "components": {
+        "server": 0.5,
+        "worker": 0.5
+      },
+      "timed_out": false,
+      "exit_code": 0,
+      "log": "/users/xinghao/CS498/Homework/hw1/public_results.logs/q2_public_03.log"
+    },
+    {
+      "id": "q3_public_01",
+      "question": 3,
+      "visibility": "public",
+      "earned": 3.0,
+      "possible": 3.0,
+      "components": {
+        "allreduce": 1.0,
+        "reduce_scatter": 1.0,
+        "all_gather": 1.0
+      },
+      "timed_out": false,
+      "exit_code": 0,
+      "log": "/users/xinghao/CS498/Homework/hw1/public_results.logs/q3_public_01.log"
+    },
+    {
+      "id": "q3_public_02",
+      "question": 3,
+      "visibility": "public",
+      "earned": 3.0,
+      "possible": 3.0,
+      "components": {
+        "allreduce": 1.0,
+        "reduce_scatter": 1.0,
+        "all_gather": 1.0
+      },
+      "timed_out": false,
+      "exit_code": 0,
+      "log": "/users/xinghao/CS498/Homework/hw1/public_results.logs/q3_public_02.log"
+    },
+    {
+      "id": "q3_public_03",
+      "question": 3,
+      "visibility": "public",
+      "earned": 3.0,
+      "possible": 3.0,
+      "components": {
+        "allreduce": 1.0,
+        "reduce_scatter": 1.0,
+        "all_gather": 1.0
+      },
+      "timed_out": false,
+      "exit_code": 0,
+      "log": "/users/xinghao/CS498/Homework/hw1/public_results.logs/q3_public_03.log"
+    },
+    {
+      "id": "q4_public_01",
+      "question": 4,
+      "visibility": "public",
+      "earned": 2.5,
+      "possible": 2.5,
+      "components": {
+        "shard": 0.5,
+        "sync": 0.6,
+        "forward": 0.4,
+        "backward": 1.0
+      },
+      "timed_out": false,
+      "exit_code": 0,
+      "log": "/users/xinghao/CS498/Homework/hw1/public_results.logs/q4_public_01.log"
+    },
+    {
+      "id": "q4_public_02",
+      "question": 4,
+      "visibility": "public",
+      "earned": 2.5,
+      "possible": 2.5,
+      "components": {
+        "shard": 0.5,
+        "sync": 0.6,
+        "forward": 0.4,
+        "backward": 1.0
+      },
+      "timed_out": false,
+      "exit_code": 0,
+      "log": "/users/xinghao/CS498/Homework/hw1/public_results.logs/q4_public_02.log"
+    },
+    {
+      "id": "q4_public_03",
+      "question": 4,
+      "visibility": "public",
+      "earned": 2.5,
+      "possible": 2.5,
+      "components": {
+        "shard": 0.5,
+        "sync": 0.6,
+        "forward": 0.4,
+        "backward": 1.0
+      },
+      "timed_out": false,
+      "exit_code": 0,
+      "log": "/users/xinghao/CS498/Homework/hw1/public_results.logs/q4_public_03.log"
+    }
+  ]
+}

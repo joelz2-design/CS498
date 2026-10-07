@@ -36,7 +36,7 @@ def all_gather(chunks, tmp, current, world, rank, left, right):
         s.wait()
         r.wait()
 
-        chunks[(current + i) % world]._copy(tmp)
+        chunks[(current + i) % world].copy_(tmp)
     #                                                                   #
     #                                                                   #
     return chunks
